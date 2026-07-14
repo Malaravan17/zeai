@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from sqlalchemy.orm import relationship
 
-from app.database.base import Base
+from database.base import Base
 
 
 class CropSeason(Base):

@@ -1,13 +1,16 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
+from sqlalchemy.orm import Session
 from schemas import UserCreate
 from services import user_service
+from database.database import get_db
 
 router = APIRouter()
 
 
 @router.post("/users")
-def create_user(user: UserCreate):
-    return user_service.add_user(user)
+def create_user(user: UserCreate,db: Session = Depends(get_db)):
+
+    return user_service.add_user(db, user)
 
 
 @router.get("/users")

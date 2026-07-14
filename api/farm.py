@@ -1,41 +1,38 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
 from schemas import FarmCreate
 from services import farm_service
+from database.database import get_db
 
 router = APIRouter()
 
 
-# Create
 @router.post("/farms")
-def create_farm(farm: FarmCreate):
-    return farm_service.add_farm(farm)
+def create_farm(farm: FarmCreate,
+                db: Session = Depends(get_db)):
+    return farm_service.add_farm(db, farm)
 
 
-# Read All
 @router.get("/farms")
-def get_all_farms():
-    return farm_service.get_all_farms()
+def get_all_farms(db: Session = Depends(get_db)):
+    return farm_service.get_all_farms(db)
 
 
-# Read One
 @router.get("/farms/{farm_id}")
-def get_farm(farm_id: int):
-    return farm_service.get_farm(farm_id)
+def get_farm(farm_id: int,
+             db: Session = Depends(get_db)):
+    return farm_service.get_farm(db, farm_id)
 
 
-# Update
 @router.put("/farms/{farm_id}")
-def update_farm(
-        farm_id: int,
-        farm: FarmCreate
-):
-    return farm_service.update_farm(
-        farm_id,
-        farm
-    )
+def update_farm(farm_id: int,
+                farm: FarmCreate,
+                db: Session = Depends(get_db)):
+    return farm_service.update_farm(db, farm_id, farm)
 
 
-# Delete
 @router.delete("/farms/{farm_id}")
-def delete_farm(farm_id: int):
-    return farm_service.delete_farm(farm_id)
+def delete_farm(farm_id: int,
+                db: Session = Depends(get_db)):
+    return farm_service.delete_farm(db, farm_id)

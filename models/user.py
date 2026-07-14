@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
-from app.database.base import Base
+from database.base import Base
 
 
 class User(Base):
@@ -24,3 +24,4 @@ class User(Base):
     chat_history = relationship("ChatHistory",back_populates="user")
     notifications = relationship("Notification",back_populates="user")
     comments = relationship("Comment",back_populates="user")
+    community_post=relationship("CommunityPost",back_populates="user")

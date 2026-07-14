@@ -1,36 +1,63 @@
+from sqlalchemy.orm import Session
+from models.comment import Comment
+
 from schemas import CommentCreate
 
 
-def add_comment(comment: CommentCreate):
+def add_comment(db: Session,
+                comment: CommentCreate):
 
-    return {
-        "message": "Comment Added Successfully",
-        "comment": comment
-    }
+    new_comment = Comment(
+        post_id=comment.post_id,
+        user_id=comment.user_id,
+        comment=comment.comment
+    )
+
+    db.add(new_comment)
+    db.commit()
+    db.refresh(new_comment)
+
+    return new_comment
 
 
-def get_comments(post_id: int):
+def get_comments(db: Session,
+                 post_id: int):
 
-    return {
-        "message": "Comments for Post",
-        "post_id": post_id,
-        "data": []
-    }
+    comments = db.query(Comment).filter(
+        Comment.post_id == post_id
+    ).all()
+
+    return comments
 
 
-def update_comment(comment_id: int,
+def update_comment(db: Session,
+                   comment_id: int,
                    comment: CommentCreate):
 
+    existing_comment = db.query(Comment).filter(
+        Comment.id == comment_id
+    ).first()
+
+    existing_comment.post_id = comment.post_id
+    existing_comment.user_id = comment.user_id
+    existing_comment.comment = comment.comment
+
+    db.commit()
+    db.refresh(existing_comment)
+
+    return existing_comment
+
+
+def delete_comment(db: Session,
+                   comment_id: int):
+
+    comment = db.query(Comment).filter(
+        Comment.id == comment_id
+    ).first()
+
+    db.delete(comment)
+    db.commit()
+
     return {
-        "message": "Comment Updated Successfully",
-        "comment_id": comment_id,
-        "comment": comment
-    }
-
-
-def delete_comment(comment_id: int):
-
-    return {
-        "message": "Comment Deleted Successfully",
-        "comment_id": comment_id
+        "message": "Comment Deleted Successfully"
     }

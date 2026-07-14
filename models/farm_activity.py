@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from unittest.mock import Base
 
 
-from app.database.base import Base
+from database.base import Base
 
 
 class FarmActivity(Base):

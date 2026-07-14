@@ -9,11 +9,26 @@ from api.chat import router as chat_router
 from api.notification import router as notification_router
 from api.community_post import router as community_post_router
 from api.comment import router as comment_router
+from database.database import engine
+from database.base import Base
+
+from models.user import User
+from models.farm import Farm
+from models.chat_history import ChatHistory
+from models.crop_season import CropSeason
+from models.farm_activity import FarmActivity
+from models.disease_report import DiseaseReport
+from models.notification import Notification
+from models.community_post import CommunityPost
+from models.comment import Comment
 
 app = FastAPI(
     title="AI Farmer Advisory System",
     version="1.0.0"
 )
+
+Base.metadata.create_all(bind=engine)
+
 
 # Register Routers
 app.include_router(user_router)

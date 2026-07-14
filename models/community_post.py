@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-from app.database.base import Base
+from database.base import Base
 
 
 class CommunityPost(Base):
@@ -21,6 +21,6 @@ class CommunityPost(Base):
 
     created_at = Column(DateTime,default=datetime.utcnow)
 
-    user = relationship("User",back_populates="community_posts")
+    user = relationship("User",back_populates="community_post")
 
     comments = relationship("Comment",back_populates="post")
