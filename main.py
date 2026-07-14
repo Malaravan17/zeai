@@ -11,6 +11,8 @@ from api.community_post import router as community_post_router
 from api.comment import router as comment_router
 from database.database import engine
 from database.base import Base
+from api import weather
+
 
 from models.user import User
 from models.farm import Farm
@@ -30,7 +32,6 @@ app = FastAPI(
 Base.metadata.create_all(bind=engine)
 
 
-# Register Routers
 app.include_router(user_router)
 app.include_router(farm_router)
 app.include_router(crop_season_router)
@@ -47,3 +48,8 @@ def root():
     return {
         "message": "Welcome to AI Farmer Advisory System"
     }
+
+app.include_router(
+    weather.router,                                                     #WEATHER API ROUTER
+    tags=["Weather"]
+)
