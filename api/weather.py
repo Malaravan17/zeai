@@ -18,3 +18,13 @@ def get_current_weather(
         db,
         farm_id
     )
+
+@router.get("/weather/forecast/{farm_id}")
+def get_weather_forecast(
+        farm_id: int,
+        db: Session = Depends(get_db)
+):
+    return weather_service.get_weather_forecast(
+        db,
+        farm_id
+    )

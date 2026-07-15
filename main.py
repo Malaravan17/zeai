@@ -12,6 +12,7 @@ from api.comment import router as comment_router
 from database.database import engine
 from database.base import Base
 from api import weather
+from api import market
 
 
 from models.user import User
@@ -50,6 +51,11 @@ def root():
     }
 
 app.include_router(
-    weather.router,                                                     #WEATHER API ROUTER
+    weather.router,                                                     # WEATHER API ROUTER
     tags=["Weather"]
+)
+
+app.include_router(
+    market.router,                                                      # MARKET APPI ROUTER
+    tags=["Market"]
 )
