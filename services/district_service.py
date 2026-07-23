@@ -1,7 +1,18 @@
 from sqlalchemy.orm import Session
-
+import requests
+from config.settings import AGMARKNET_BASE_URL
 from models.district import District
 from models.state import State
+
+def fetch_all_districts():
+
+    response = requests.get(
+        f"{AGMARKNET_BASE_URL}/agmarknet/districts"
+    )
+
+    districts = response.json()
+
+    return districts
 
 
 def sync_districts(db: Session, districts: list):

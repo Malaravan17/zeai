@@ -1,6 +1,18 @@
 from sqlalchemy.orm import Session
 from models.state import State
+import requests
+from config.settings import AGMARKNET_BASE_URL
 
+
+def fetch_all_states():
+
+    response = requests.get(
+        f"{AGMARKNET_BASE_URL}/agmarknet/states"
+    )
+
+    states = response.json()
+
+    return states
 
 def sync_states(db: Session, states: list):
 
