@@ -14,7 +14,7 @@ from database.base import Base
 from api import weather
 from api import market
 
-
+from api.ai import router as ai_router
 from models.user import User
 from models.farm import Farm
 from models.chat_history import ChatHistory
@@ -42,6 +42,7 @@ app.include_router(chat_router)
 app.include_router(notification_router)
 app.include_router(community_post_router)
 app.include_router(comment_router)
+app.include_router(ai_router)
 
 
 @app.get("/")
