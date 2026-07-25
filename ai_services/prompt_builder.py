@@ -58,4 +58,13 @@ def build_prompt(
 
         prompt += "\n"
 
+    # Market Information
+    if "market" in context:
+
+        market = context["market"]
+
+        prompt += "Market Information:\n"
+
+        prompt += f"{market}\n\n"
+
     return prompt
