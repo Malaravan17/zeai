@@ -42,3 +42,5 @@ def process_question(
     )
 
     return response
+
+rag_context = retriever_service.retrieve(question, capabilities)

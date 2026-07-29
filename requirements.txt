@@ -10,3 +10,6 @@ google-genai
 pgvector
 sentence-transformers
 pypdf
+langchain
+langchain-community
+langchain-text-splitters
