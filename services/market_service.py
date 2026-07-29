@@ -1,38 +1,47 @@
 import requests
+from sqlalchemy.orm import Session
+
+from config.settings import AGMARKNET_BASE_URL, AGMARKNET_API_KEY
+
 from models.farm import Farm
 from models.crop_season import CropSeason
 from models.commodity import Commodity
 from models.state import State
 from models.district import District
 from models.market import Market
-from sqlalchemy.orm import Session
-from config.settings import AGMARKNET_BASE_URL
-from models.commodity import Commodity
 
+
+# =============================================
+# Common Headers
+# =============================================
 
 # =============================================
 # Fetch Commodities From AGMARKNET
 # =============================================
 
+HEADERS = {
+    "Authorization": f"Bearer {AGMARKNET_API_KEY}"
+}
+
 def fetch_all_commodities():
-
     response = requests.get(
-        f"{AGMARKNET_BASE_URL}/agmarknet/commodities"
+        f"{AGMARKNET_BASE_URL}/agmarknet/commodities",
+        headers=HEADERS,
+        timeout=30,
     )
-
-    commodities = response.json()
-
-    return commodities
-
+    response.raise_for_status()
+    return response.json()["output"]["data"]
 
 # =============================================
 # Sync Commodities To Database
 # =============================================
 
 def sync_commodities(
-        db: Session,
-        commodities: list
+    db: Session,
+    commodities: list
 ):
+
+    inserted = 0
 
     for commodity in commodities:
 
@@ -42,39 +51,35 @@ def sync_commodities(
 
         if existing is None:
 
-            new_commodity = Commodity(
-
-                commodity_id=commodity["commodity_id"],
-
-                commodity_name=commodity["commodity_name"]
-
+            db.add(
+                Commodity(
+                    commodity_id=commodity["commodity_id"],
+                    commodity_name=commodity["commodity_name"]
+                )
             )
 
-            db.add(new_commodity)
+            inserted += 1
 
     db.commit()
 
     return {
-        "message": "Commodities Synced Successfully"
+        "message": "Commodities Synced Successfully",
+        "inserted": inserted
     }
 
 
 # =============================================
-# Read Commodities From Database
+# Read Commodities
 # =============================================
 
 def get_all_commodities(db: Session):
 
-    commodities = db.query(
-        Commodity
-    ).all()
-
-    return commodities
+    return db.query(Commodity).all()
 
 
-
-
-
+# =============================================
+# Get Market Prices
+# =============================================
 
 def get_market_prices(
     db: Session,
@@ -84,6 +89,7 @@ def get_market_prices(
     # ----------------------------
     # Find Farm
     # ----------------------------
+
     farm = db.query(Farm).filter(
         Farm.id == farm_id
     ).first()
@@ -96,6 +102,7 @@ def get_market_prices(
     # ----------------------------
     # Find Active Crop
     # ----------------------------
+
     crop = db.query(CropSeason).filter(
         CropSeason.farm_id == farm_id,
         CropSeason.status == "active"
@@ -109,6 +116,7 @@ def get_market_prices(
     # ----------------------------
     # Find Commodity
     # ----------------------------
+
     commodity = db.query(Commodity).filter(
         Commodity.commodity_name == crop.crop_name
     ).first()
@@ -121,6 +129,7 @@ def get_market_prices(
     # ----------------------------
     # Find State
     # ----------------------------
+
     state = db.query(State).filter(
         State.state_name == farm.state
     ).first()
@@ -133,6 +142,7 @@ def get_market_prices(
     # ----------------------------
     # Find District
     # ----------------------------
+
     district = db.query(District).filter(
         District.district_name == farm.district
     ).first()
@@ -145,6 +155,7 @@ def get_market_prices(
     # ----------------------------
     # Find Markets
     # ----------------------------
+
     markets = db.query(Market).filter(
         Market.district_id == district.id
     ).all()
@@ -154,16 +165,15 @@ def get_market_prices(
             "message": "No markets found"
         }
 
-    market_ids = []
-
-    for market in markets:
-        market_ids.append(
-            market.market_id
-        )
+    market_ids = [
+        market.market_id
+        for market in markets
+    ]
 
     # ----------------------------
-    # Request Body
+    # Payload
     # ----------------------------
+
     payload = {
 
         "commodity_id": commodity.commodity_id,
@@ -182,12 +192,25 @@ def get_market_prices(
 
     }
 
+    print("\n========== MARKET REQUEST ==========")
+    print(payload)
+    print("====================================\n")
+
     # ----------------------------
-    # Call AGMARKNET API
+    # Call API
     # ----------------------------
+
     response = requests.post(
         f"{AGMARKNET_BASE_URL}/agmarknet/prices",
+        headers=HEADERS,
         json=payload
     )
+
+    print("\n========== MARKET RESPONSE ==========")
+    print("Status:", response.status_code)
+    print("Response:", response.text)
+    print("=====================================\n")
+
+    response.raise_for_status()
 
     return response.json()
