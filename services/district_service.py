@@ -1,18 +1,21 @@
 from sqlalchemy.orm import Session
 import requests
-from config.settings import AGMARKNET_BASE_URL
+from config.settings import AGMARKNET_BASE_URL,AGMARKNET_API_KEY
 from models.district import District
 from models.state import State
 
-def fetch_all_districts():
+HEADERS = {
+    "Authorization": f"Bearer {AGMARKNET_API_KEY}"
+}
 
+def fetch_all_geographies():
     response = requests.get(
-        f"{AGMARKNET_BASE_URL}/agmarknet/districts"
+        f"{AGMARKNET_BASE_URL}/agmarknet/geographies",
+        headers=HEADERS,
+        timeout=30
     )
-
-    districts = response.json()
-
-    return districts
+    response.raise_for_status()
+    return response.json()["output"]["data"]
 
 
 def sync_districts(db: Session, districts: list):
@@ -20,23 +23,23 @@ def sync_districts(db: Session, districts: list):
     for district in districts:
 
         state = db.query(State).filter(
-            State.state_id == district["state_id"]
+            State.state_id == district["census_state_id"]
         ).first()
 
         if state is None:
             continue
 
         existing = db.query(District).filter(
-            District.district_id == district["district_id"]
+            District.district_id == district["census_district_id"]
         ).first()
 
         if existing is None:
 
             new_district = District(
 
-                district_id=district["district_id"],
+                district_id=district["census_district_id"],
 
-                district_name=district["district_name"],
+                district_name=district["census_district_name"],
 
                 state_id=state.id
 

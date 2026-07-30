@@ -5,7 +5,7 @@ from ai_services.prompt_builder import build_prompt
 from ai_services.gemini_service import ask_gemini
 
 from services.weather_service import get_current_weather
-from services.market_service import get_market_prices
+from services.market_service import sync_markets_for_farm
 
 
 def process_question(
@@ -27,7 +27,7 @@ def process_question(
 
     if "market" in capabilities:
 
-        context["market"] = get_market_prices(
+        context["market"] = sync_markets_for_farm(
             db,
             farm_id
         )
@@ -42,4 +42,3 @@ def process_question(
     )
 
     return response
-
